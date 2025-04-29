@@ -13,16 +13,328 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id        Int     @id @default(autoincrement())
-  username String   @unique
-  password String   @unique
-  role     UserRole
+  id        Int      @id @default(autoincrement())
+  email     String?  @unique
+  firstName String?
+  lastname  String?
+  nickName  String?
+  password  String
+  role      UserRole
+  order     Order[]
+  // userLog  UserLog[]
+}
+
+model SalesLog {
+  id          Int     @id @default(autoincrement())
+  email       String?
+  action      String?
+  orderNumber String?
+  timeStamp   String?
+}
+
+model PrepressLog {
+  id          Int     @id @default(autoincrement())
+  email       String?
+  action      String?
+  orderNumber String?
+  timeStamp   String?
+}
+
+model UserLog {
+  id            Int     @id @default(autoincrement())
+  userId        Int
+  // user          User    @relation(fields: [userId], references: [id])
+  timeStamp     String?
+  loginOrLogout String?
+}
+
+model DisPlayQueue {
+  id       Int      @id @default(autoincrement())
+  orderId  Int      @unique
+  order    Order    @relation(fields: [orderId], references: [id])
+  isActive Boolean?
+}
+
+// model Notification {
+//   id              Int     @id @default(autoincrement())
+//   notiOrderNumber String?
+//   notiErpNumber   String?
+//   notiStatus      String?
+//   timeStamp       String?
+//   userId          Int?
+//   orderId         Int
+//   order           Order   @relation(fields: [orderId], references: [id])
+// }
+
+model Order {
+  id                    Int         @id @default(autoincrement())
+  userId                Int
+  user                  User        @relation(fields: [userId], references: [id])
+  orderNumber           String?     @unique
+  quotationNumber       String?
+  erpNumber             String?
+  status                OrderStatus
+  prepressOwner         String?
+  prepressToCheck       String?
+  prepressToCheckLayout String?
+
+  reviseCount          Int?           @default(0)
+  rejectCount          Int?           @default(0)
+  revisedRemark        String?        @db.VarChar(500)
+  rejectedRemark       String?        @db.VarChar(500)
+  checkedRemark        String?        @db.VarChar(500)
+  layoutRejectedRemark String?        @db.VarChar(500)
+  adminRemark          String?        @db.VarChar(500)
+  createdAt            String?
+  timeStamp            String?
+  disPlayQueue         DisPlayQueue[]
+  // notification   Notification[]
+  // subOrder       SubOrder[]
+  // orderLog       OrderLog[]
+  // subOrderFile   SubOrderFile[]
+}
+
+model OrderLog {
+  id                   Int     @id @default(autoincrement())
+  orderId              Int?
+  // order          Order   @relation(fields: [orderId], references: [id])
+  timeStamp            String?
+  orderNumber          String?
+  erpNumber            String?
+  artworkOwner         String?
+  artworkChecker       String?
+  layoutChecker        String?
+  orderOwner           String?
+  status               String?
+  action               String?
+  actionOwner          String?
+  revisedRemark        String? @db.VarChar(500)
+  rejectedRemark       String? @db.VarChar(500)
+  checkedRemark        String? @db.VarChar(500)
+  layoutRejectedRemark String? @db.VarChar(500)
+  adminRemark          String? @db.VarChar(500)
+}
+
+model DeletedOrderLog {
+  id             Int     @id @default(autoincrement())
+  orderId        Int?
+  timeStamp      String?
+  orderNumber    String?
+  status         String?
+  revisedRemark  String? @db.VarChar(500)
+  rejectedRemark String? @db.VarChar(500)
+}
+
+// model SubOrderFile {
+//   id                   Int            @id @default(autoincrement())
+//    orderId              Int
+//    order                Order          @relation(fields: [orderId], references: [id])
+//    fileOwner           String?
+//    file1              String?
+//    file2              String?
+//    file3              String?
+//    file4              String?
+//    timeStamp   String?
+// }
+
+model SubOrder {
+  id                   Int            @id @default(autoincrement())
+  orderId              Int
+  // order                Order          @relation(fields: [orderId], references: [id])
+  orderNumber          String?
+  quotationNumber      String?
+  customerName         String?
+  productCode          String?
+  jobName              String?
+  salesManager         String?
+  contact              String?
+  c                    String?
+  telephoneNumber      String?
+  email                String?
+  typeOfPrinterMachine typeOfMachine?
+  typeOfColor          typeOfColor?
+  cmykEtc              String?
+  cyan                 Boolean?
+  magenta              Boolean?
+  yellow               Boolean?
+  black                Boolean?
+  white                Boolean?
+  pantone1             Boolean?
+  pantone2             Boolean?
+  pantone3             Boolean?
+  pantone4             Boolean?
+  subPantone1          String?
+  subPantone2          String?
+  subPantone3          String?
+  subPantone4          String?
+  typeOfFormat         typeOfFormat?
+  digitalProof         Boolean?
+  typeOfFormatErp      Boolean?
+  subTypeOfFormatErp   String?
+
+  spotUv                Boolean?
+  removeGlue            Boolean?
+  leaveCoatingUv        Boolean?
+  pumpHoleEyeAndVine    Boolean?
+  additionalEtc         Boolean?
+  subAdditionalEtc      String?
+  //////
+  outsourceType         outsourceType?
+  //////
+  typeOfCoated          typeOfCoated?
+  subCoatedEtc          String?
+  ///
+  typeOfUv              typeOfUv?
+  coldFoil              typeOfColdFoil?
+  subColdFoilEtc        String?
+  materialSticker       String?
+  materialFSC           Boolean?
+  unitSizeFrontY        String?
+  unitSizeFrontX        String?
+  unitSizeBlackY        String?
+  unitSizeBlackX        String?
+  /////
+  typeOfCorner          typeOfCorner?
+  subUpperCorner        String?
+  ////
+  typeOfPacking         typeOfPacking?
+  subSheet              String?
+  subRoll               String?
+  space                 String?
+  typeOfCore            typeOfCore?
+  purchaseOrderQty      String?
+  set                   Boolean?
+  pcs                   Boolean?
+  typeOfRoll            typeOfRoll?
+  subOuterRoll          typeOfOuterRoll?
+  insideRollRemark      String?
+  remark                String?          @db.VarChar(500)
+  erp                   String?
+  confirm               String?
+  rev                   String?
+  salesCoName           String?
+  salesCoDate           String?
+  salesCoTime           String?
+  salesCoMgr            String?
+  salesCoMgrDate        String?
+  salesCoMgrTime        String?
+  prepressName          String?
+  prepressDate          String?
+  prepressTime          String?
+  prepressNameCheckedBy String?
+  prepressDateCheckedBy String?
+  prepressTimeCheckedBy String?
+  prepressRemark        String?
+  createdAt             String?
+}
+
+enum typeOfColor {
+  CMYK
+  BLACK
+  ETC
+}
+
+enum outsourceType {
+  STICKER
+  OFFSET
+  FSC
+}
+
+enum typeOfFormat {
+  ORIGINAL
+  BLANKTEST
+  BLANK
+}
+
+enum typeOfOuterRoll {
+  OUTERROLLFRONTHEADSIDE
+  OUTERROLLFRONTBACKSIDE
+  OUTERROLLFRONTRIGHTSIDE
+  OUTERROLLFRONTLEFTSIDE
+
+  OUTERROLLBACKHEADSIDE
+  OUTERROLLBACKBACKSIDE
+  OUTERROLLBACKRIGHTSIDE
+  OUTERROLLBACKLEFTSIDE
+
+  OUTERROLLFRONTBACKRIGHTSIDE
+  OUTERROLLFRONTBACKLEFTSIDE
+}
+
+enum typeOfRoll {
+  OUTERROLL
+  INSIDEROLL
+}
+
+enum typeOfCore {
+  ONEINCH
+  ONEPONITFIVEINCH
+  THREEINCH
+}
+
+enum typeOfPacking {
+  SHEET
+  ROLL
+}
+
+enum typeOfCorner {
+  UPPERCORNER
+  SQUARES
+  ASJOBLAYOUT
+}
+
+enum typeOfColdFoil {
+  SILVER
+  GOLD
+  TYPEOFCOLDFOILETC
+}
+
+enum typeOfUv {
+  GLOSS
+  MATT
+}
+
+enum typeOfCoated {
+  POG
+  POM
+  BOPP
+  COATEDETC
+}
+
+enum typeOfMachine {
+  LETTERPRESS
+  F31F32
+  D2
+  S29
+  M3
+  OUTSOURCE
 }
 
 enum UserRole {
   SALES
   PREPRESS
+  PRODUCTIONPLANNER
   ADMIN
+}
+
+enum OrderStatus {
+  newJob
+  holding
+  inQueue
+  working
+  rejected
+  waitForPrepressToCheck
+  checking
+  rejectedAfterChecked
+  waitToConfirm
+  revised
+  completed
+  urgentJob
+  readyToLayout
+  workingLayout
+  waitForPrepressToCheckLayout
+  checkingLayout
+  rejectedAfterCheckedLayout
+  completedAfterLayout
 }
